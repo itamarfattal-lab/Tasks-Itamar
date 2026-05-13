@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="משימות" />
+  <meta name="theme-color" content="#0f0f0f" />
+  <title>משימות</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --card: #141414;
+      --input-bg: #171717;
+      --border: #1f1f1f;
+      --border2: #252525;
+      --accent: #c8f060;
+      --accent-dark: #1e2a10;
+      --text: #f0ece4;
+      --text-dim: #aaa;
+      --text-muted: #444;
+      --text-faint: #383838;
+      --red: #e03333;
+      --red-dim: #2a1212;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Heebo', sans-serif;
+      direction: rtl;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      padding-bottom: max(100px, env(safe-area-inset-bottom) + 80px);
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes hint-in {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pop-in {
+      0%   { transform: scale(0.92); opacity: 0; }
+      60%  { transform: scale(1.03); }
+      100% { transform: scale(1);    opacity: 1; }
+    }
+
+    /* ── Header ── */
+    .header {
+      padding: max(52px, env(safe-area-inset-top) + 28px) 24px 24px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .header-label {
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: #555;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .header-title {
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+    .header-title span { color: var(--accent); }
+    .header-count {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ── Input area ── */
+    .input-area { padding: 20px 24px 0; }
+
+    .hint-box {
+      background: var(--accent-dark);
+      border: 1px solid #3a4a20;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #a8d040;
+      line-height: 1.5;
+      animation: hint-in 0.2s ease;
+    }
+
+    .input-row {
+      background: var(--input-bg);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      transition: border-color 0.2s;
+    }
+
+    textarea {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 16px;
+      font-family: inherit;
+      resize: none;
+      line-height: 1.5;
+      direction: rtl;
+      min-height: 26px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    textarea:focus { outline: none; }
+    textarea::placeholder { color: var(--text-muted); }
+
+    .btn-circle {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 20px;
+      transition: all 0.15s;
+      -webkit-user-select: none;
+    }
+    .btn-circle:active { transform: scale(0.9); }
+
+    .btn-mic {
+      background: var(--accent-dark);
+      color: var(--accent);
+    }
+
+    .btn-add {
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--accent);
+      color: #0a0a0a;
+    }
+    .btn-add:disabled {
+      background: #1a1a1a;
+      color: #2a2a2a;
+      cursor: not-allowed;
+    }
+
+    .input-hint {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #333;
+      text-align: center;
+    }
+
+    /* ── Task list ── */
+    .task-list { padding: 20px 24px 0; }
+
+    .empty-state {
+      text-align: center;
+      padding: 64px 0;
+      color: #2a2a2a;
+      font-size: 14px;
+    }
+    .empty-icon { font-size: 44px; margin-bottom: 14px; }
+    .empty-sub { color: #333; font-size: 12px; }
+
+    .task-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 15px 16px;
+      margin-bottom: 9px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      animation: pop-in 0.25s ease;
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 15px;
+      line-height: 1.55;
+      color: #eee;
+      word-break: break-word;
+    }
+    .task-date {
+      margin-top: 5px;
+      font-size: 11px;
+      color: var(--text-faint);
+    }
+
+    .btn-done {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--border2);
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .btn-done:active, .btn-done:hover {
+      background: var(--red-dim);
+      color: #ff7070;
+      border-color: var(--red);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-label">המשימות שלי</div>
+    <div class="header-title">מה צריך<br><span>לעשות?</span></div>
+    <div class="header-count" id="count">הכל נקי ✓</div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <div class="hint-box" id="hint" style="display:none">
+      🎤 <strong>רוצה להכתיב?</strong> לחץ על כפתור המיקרופון במקלדת של הטלפון (ליד הרווח)
+    </div>
+
+    <div class="input-row">
+      <textarea id="task-input" placeholder="רשום משימה..." rows="1"></textarea>
+      <button class="btn-circle btn-mic" id="mic-btn" title="הקלט בקול">🎤</button>
+      <button class="btn-circle btn-add" id="add-btn" disabled>+</button>
+    </div>
+    <div class="input-hint">לחץ 🎤 ואז על מיקרופון במקלדת לכתיב קולי</div>
+  </div>
+
+  <!-- Tasks -->
+  <div class="task-list" id="task-list"></div>
+
+  <script>
+    const STORAGE_KEY = "quick-tasks-v1";
+
+    let tasks = [];
+    try { tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch {}
+
+    const taskInput = document.getElementById("task-input");
+    const addBtn    = document.getElementById("add-btn");
+    const micBtn    = document.getElementById("mic-btn");
+    const taskList  = document.getElementById("task-list");
+    const countEl   = document.getElementById("count");
+    const hintEl    = document.getElementById("hint");
+
+    let hintTimer = null;
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    }
+
+    function formatTime(ts) {
+      return new Date(ts).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+    }
+    function formatDate(ts) {
+      return new Date(ts).toLocaleDateString("he-IL", { weekday: "short", day: "numeric", month: "short" });
+    }
+
+    function updateCount() {
+      const n = tasks.length;
+      countEl.textContent = n === 0
+        ? "הכל נקי ✓"
+        : `${n} משימה${n !== 1 ? "ות" : ""} פתוח${n !== 1 ? "ות" : "ה"}`;
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = "";
+      if (tasks.length === 0) {
+        taskList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">✦</div>
+            אין משימות<br>
+            <span class="empty-sub">הוסף משימה למעלה</span>
+          </div>`;
+        return;
+      }
+      tasks.forEach(task => {
+        const card = document.createElement("div");
+        card.className = "task-card";
+        card.dataset.id = task.id;
+        card.innerHTML = `
+          <div style="flex:1">
+            <div class="task-text">${task.text}</div>
+            <div class="task-date">${formatDate(task.createdAt)} · ${formatTime(task.createdAt)}</div>
+          </div>
+          <button class="btn-done" title="בוצע — מחק">✓</button>`;
+        card.querySelector(".btn-done").addEventListener("click", () => deleteTask(task.id, card));
+        taskList.appendChild(card);
+      });
+    }
+
+    function addTask() {
+      const text = taskInput.value.trim();
+      if (!text) return;
+      tasks.unshift({ id: Date.now(), text, createdAt: Date.now() });
+      save();
+      taskInput.value = "";
+      addBtn.disabled = true;
+      autoResize();
+      updateCount();
+      renderTasks();
+    }
+
+    function deleteTask(id, card) {
+      card.style.transition = "opacity 0.2s, transform 0.2s";
+      card.style.opacity = "0";
+      card.style.transform = "translateX(30px)";
+      setTimeout(() => {
+        tasks = tasks.filter(t => t.id !== id);
+        save();
+        updateCount();
+        renderTasks();
+      }, 200);
+    }
+
+    function autoResize() {
+      taskInput.style.height = "auto";
+      taskInput.style.height = taskInput.scrollHeight + "px";
+    }
+
+    taskInput.addEventListener("input", () => {
+      addBtn.disabled = !taskInput.value.trim();
+      autoResize();
+    });
+
+    taskInput.addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); addTask(); }
+    });
+
+    addBtn.addEventListener("click", addTask);
+
+    micBtn.addEventListener("click", () => {
+      taskInput.focus();
+      hintEl.style.display = "block";
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(() => { hintEl.style.display = "none"; }, 4000);
+    });
+
+    updateCount();
+    renderTasks();
+  </script>
+</body>
+</html>
